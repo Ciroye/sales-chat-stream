@@ -46,26 +46,75 @@ class StreamEventsV1:
 
 
 async def stream_sales_chat_v_1() -> AsyncGenerator[str, None]:
-    yield f"data: {StreamEventsV1.stepping(StreamSteppingTypeV1.GENERATION)}\n\n"
+    yield StreamEventsV1.stepping(StreamSteppingTypeV1.GENERATION) + "\n"
 
     sales_responses = [
-        "Hello, how are you?",
-        "I'm doing well, thank you!",
-        "What's your name?",
-        "My name is John Doe.",
-        "What is your favorite color?",
-        "My favorite color is blue.",
-        "What is your favorite food?",
+        "Hello",
+        "How",
+        "Are",
+        "You",
+        "What",
+        "Is",
+        "Your",
+        "Name",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Color",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Food",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Sport",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Movie",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Song",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Artist",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Book",
+        "And",
+        "What",
+        "Is",
+        "Your",
+        "Favorite",
+        "Game",
     ]
 
     for response in sales_responses:
-        yield f"data: {StreamEventsV1.message_delta(response)}\n\n"
+        yield StreamEventsV1.message_delta(response) + "\n"
         await asyncio.sleep(0.6)
 
-    yield f"data: {StreamEventsV1.message_complete(''.join(sales_responses))}\n\n"
-    yield f"data: {StreamEventsV1.stepping(StreamSteppingTypeV1.POST_PROCESSING)}\n\n"
-    yield f"data: {StreamEventsV1.stepping(StreamSteppingTypeV1.FINALIZATION)}\n\n"
-    yield f"data: {StreamEventsV1.end()}\n\n"
+    yield StreamEventsV1.message_complete("".join(sales_responses)) + "\n"
+    yield StreamEventsV1.stepping(StreamSteppingTypeV1.POST_PROCESSING) + "\n"
+    yield StreamEventsV1.stepping(StreamSteppingTypeV1.FINALIZATION) + "\n"
+    yield StreamEventsV1.end() + "\n"
 
 
 @app.get("/stream")
