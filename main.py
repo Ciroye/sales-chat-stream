@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-from typing import AsyncGenerator, List, Dict, Optional, Any
+from typing import AsyncGenerator
 import asyncio
-import aiohttp
 import json
 
 app = FastAPI()
@@ -50,11 +49,15 @@ class StreamEventsV1:
 async def stream_sales_chat_v_1() -> AsyncGenerator[str, None]:
     yield StreamEventsV1.stepping(StreamSteppingTypeV1.GENERATION)
 
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            "https://sales-chat-api-1074179285622.us-central1.run.app/"
-        ) as response:
-            sales_responses = await response.json()
+    sales_responses = [
+        "Hello, how are you?",
+        "I'm doing well, thank you!",
+        "What's your name?",
+        "My name is John Doe.",
+        "What is your favorite color?",
+        "My favorite color is blue.",
+        "What is your favorite food?",
+    ]
 
     for response in sales_responses:
         yield StreamEventsV1.message_delta(response) + "\n"
@@ -69,3 +72,9 @@ async def stream_sales_chat_v_1() -> AsyncGenerator[str, None]:
 @app.get("/stream")
 async def stream_endpoint():
     return StreamingResponse(stream_sales_chat_v_1(), media_type="text/event-stream")
+
+
+# Health check endpoint
+@app.get("/")
+async def health_check():
+    return {"status": "ok"}
