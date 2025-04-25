@@ -61,7 +61,7 @@ async def stream_sales_chat_v_1() -> AsyncGenerator[str, None]:
 
     for response in sales_responses:
         yield StreamEventsV1.message_delta(response) + "\n"
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.6)
 
     yield StreamEventsV1.message_complete("".join(sales_responses)) + "\n"
     yield StreamEventsV1.stepping(StreamSteppingTypeV1.POST_PROCESSING) + "\n"
