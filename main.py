@@ -46,7 +46,7 @@ class StreamEventsV1:
 
 
 async def stream_sales_chat_v_1() -> AsyncGenerator[str, None]:
-    yield StreamEventsV1.stepping(StreamSteppingTypeV1.GENERATION) + "\n"
+    yield f"data: {StreamEventsV1.stepping(StreamSteppingTypeV1.GENERATION)}\n\n"
 
     sales_responses = [
         "Hello",
@@ -108,13 +108,13 @@ async def stream_sales_chat_v_1() -> AsyncGenerator[str, None]:
     ]
 
     for response in sales_responses:
-        yield StreamEventsV1.message_delta(response) + "\n"
-        await asyncio.sleep(0.6)
+        yield f"data: {StreamEventsV1.message_delta(response)}\n\n"
+        await asyncio.sleep(0.2)
 
-    yield StreamEventsV1.message_complete("".join(sales_responses)) + "\n"
-    yield StreamEventsV1.stepping(StreamSteppingTypeV1.POST_PROCESSING) + "\n"
-    yield StreamEventsV1.stepping(StreamSteppingTypeV1.FINALIZATION) + "\n"
-    yield StreamEventsV1.end() + "\n"
+    yield f"data: {StreamEventsV1.message_complete(''.join(sales_responses))}\n\n"
+    yield f"data: {StreamEventsV1.stepping(StreamSteppingTypeV1.POST_PROCESSING)}\n\n"
+    yield f"data: {StreamEventsV1.stepping(StreamSteppingTypeV1.FINALIZATION)}\n\n"
+    yield f"data: {StreamEventsV1.end()}\n\n"
 
 
 @app.get("/stream")
