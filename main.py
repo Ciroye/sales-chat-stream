@@ -1,0 +1,71 @@
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from typing import AsyncGenerator, List, Dict, Optional, Any
+import asyncio
+import aiohttp
+import json
+
+app = FastAPI()
+
+
+# Assuming these enums and classes are already defined
+class StreamSteppingTypeV1:
+    GENERATION = "generation"
+    POST_PROCESSING = "post_processing"
+    FINALIZATION = "finalization"
+
+
+class StreamEventTypeV1:
+    MESSAGE_DELTA = "message_delta"
+    MESSAGE_COMPLETE = "message_complete"
+    STEPPING = "stepping"
+    END = "end"
+
+
+class StreamEventsV1:
+    @staticmethod
+    def message_delta(delta: str) -> str:
+        return json.dumps(
+            {"event": StreamEventTypeV1.MESSAGE_DELTA, "data": {"delta": delta}}
+        )
+
+    @staticmethod
+    def message_complete(final_message: str) -> str:
+        return json.dumps(
+            {
+                "event": StreamEventTypeV1.MESSAGE_COMPLETE,
+                "data": {"final_message": final_message},
+            }
+        )
+
+    @staticmethod
+    def stepping(type: str) -> str:
+        return json.dumps({"event": StreamEventTypeV1.STEPPING, "data": {"type": type}})
+
+    @staticmethod
+    def end() -> str:
+        return json.dumps({"event": StreamEventTypeV1.END})
+
+
+async def stream_sales_chat_v_1() -> AsyncGenerator[str, None]:
+    yield StreamEventsV1.stepping(StreamSteppingTypeV1.GENERATION)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(
+            "https://sales-chat-api-1074179285622.us-central1.run.app/"
+        ) as response:
+            sales_responses = await response.json()
+
+    for response in sales_responses:
+        yield StreamEventsV1.message_delta(response) + "\n"
+        await asyncio.sleep(0.1)
+
+    yield StreamEventsV1.message_complete("".join(sales_responses)) + "\n"
+    yield StreamEventsV1.stepping(StreamSteppingTypeV1.POST_PROCESSING) + "\n"
+    yield StreamEventsV1.stepping(StreamSteppingTypeV1.FINALIZATION) + "\n"
+    yield StreamEventsV1.end() + "\n"
+
+
+@app.get("/stream")
+async def stream_endpoint():
+    return StreamingResponse(stream_sales_chat_v_1(), media_type="text/event-stream")
